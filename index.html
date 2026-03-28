@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HaiWiFi — Download the App</title>
+  <meta property="og:title" content="HaiWiFi" />
+  <meta property="og:description" content="Smart WiFi, everywhere you go." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent:   #5d6af1;
+      --accent2:  #7b84f3;
+      --bg-from:  #09001b;
+      --bg-mid:   #170044;
+      --bg-to:    #060015;
+      --card-bg:  #050505;
+      --diamond1: #3b468e;
+      --diamond2: #13173a;
+      --badge-bg1:#322564;
+      --badge-bg2:#1a103c;
+      --border:   rgba(255,255,255,0.18);
+      --text:     #ffffff;
+      --muted:    rgba(255,255,255,0.38);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    body {
+      background: linear-gradient(180deg, var(--bg-from) 0%, var(--bg-mid) 40%, var(--bg-to) 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Canvas */
+    #canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Corner marks */
+    .corner {
+      position: fixed;
+      width: 20px; height: 20px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease 1.1s forwards;
+      z-index: 10;
+    }
+    .corner--tl { top:2rem; left:2rem; border-top:1px solid rgba(255,255,255,0.12); border-left:1px solid rgba(255,255,255,0.12); }
+    .corner--tr { top:2rem; right:2rem; border-top:1px solid rgba(255,255,255,0.12); border-right:1px solid rgba(255,255,255,0.12); }
+    .corner--bl { bottom:2rem; left:2rem; border-bottom:1px solid rgba(255,255,255,0.12); border-left:1px solid rgba(255,255,255,0.12); }
+    .corner--br { bottom:2rem; right:2rem; border-bottom:1px solid rgba(255,255,255,0.12); border-right:1px solid rgba(255,255,255,0.12); }
+
+    /* Main container */
+    .mobile-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px 56px;
+    }
+
+    /* Top pill badge */
+    .top-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(90deg, var(--badge-bg1), var(--badge-bg2));
+      border: 2px solid var(--border);
+      padding: 9px 32px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 700;
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.08), 0 4px 20px rgba(0,0,0,0.4);
+      margin-bottom: 44px;
+      letter-spacing: 0.02em;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeUp 0.6s ease 0.2s forwards;
+    }
+    .top-badge i { color: var(--accent); font-size: 18px; }
+
+    /* Heading */
+    .heading {
+      text-align: center;
+      font-size: clamp(22px, 5vw, 28px);
+      font-weight: 900;
+      line-height: 1.3;
+      letter-spacing: -0.02em;
+      margin-bottom: 40px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeUp 0.6s ease 0.35s forwards;
+    }
+    .heading .accent { color: var(--accent); }
+
+    /* Feature card */
+    .feature-card {
+      background: var(--card-bg);
+      width: 100%;
+      border-radius: 24px;
+      padding: 44px 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 28px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+      margin-bottom: 52px;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.6s ease 0.5s forwards;
+    }
+
+    /* Diamond icons */
+    .diamond-wrapper {
+      width: 68px; height: 68px;
+      background: linear-gradient(145deg, var(--diamond1), var(--diamond2));
+      border-radius: 16px;
+      transform: rotate(45deg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: inset 0 0 15px rgba(255,255,255,0.08), 0 6px 20px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: box-shadow 0.3s;
+    }
+    .diamond-wrapper:hover {
+      box-shadow: inset 0 0 20px rgba(93,106,241,0.3), 0 6px 24px rgba(93,106,241,0.3);
+    }
+    .diamond-wrapper i {
+      transform: rotate(-45deg);
+      font-size: 26px;
+      color: #fff;
+      text-shadow: 0 0 12px rgba(255,255,255,0.5);
+    }
+
+    /* App icon box */
+    .app-icon-box {
+      width: 76px; height: 76px;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle, #101642 0%, #02030a 100%);
+      box-shadow: inset 0 0 18px rgba(93,106,241,0.2), 0 0 20px rgba(93,106,241,0.12);
+      gap: 5px;
+      transition: box-shadow 0.3s;
+    }
+    .app-icon-box:hover {
+      box-shadow: inset 0 0 24px rgba(93,106,241,0.35), 0 0 30px rgba(93,106,241,0.25);
+    }
+    .app-icon-box i { font-size: 26px; color: var(--accent); }
+    .app-icon-box span {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+    }
+
+    /* Buttons row */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeUp 0.6s ease 0.65s forwards;
+    }
+
+    /* Install button */
+    .install-btn {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 5px;
+      padding-right: 28px;
+      background: rgba(255,255,255,0.03);
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s;
+      cursor: pointer;
+    }
+    .install-btn:hover {
+      background: rgba(93,106,241,0.08);
+      border-color: rgba(93,106,241,0.5);
+      transform: translateY(-2px);
+    }
+    .install-btn:active { transform: scale(0.97); }
+
+    .android-icon {
+      background-color: var(--accent);
+      padding: 11px 16px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .android-icon i { color: #09001b; font-size: 26px; }
+
+    .install-text {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 900;
+      margin-left: 18px;
+      letter-spacing: 1.5px;
+    }
+
+    /* Link button */
+    .link-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 13px 18px;
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.2s;
+    }
+    .link-btn:hover {
+      border-color: rgba(93,106,241,0.5);
+      color: #fff;
+      background: rgba(93,106,241,0.08);
+      transform: translateY(-2px);
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 48px;
+      font-size: 14px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease 0.9s forwards;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+    .footer span { color: var(--accent2); }
+
+    /* Link modal */
+    #link-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    #modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+    }
+    #modal-box {
+      position: relative;
+      background: #0d0023;
+      border: 1px solid rgba(93,106,241,0.3);
+      border-radius: 16px;
+      padding: 2rem;
+      width: min(420px, 90vw);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      box-shadow: 0 0 60px rgba(93,106,241,0.15);
+    }
+    #modal-box h3 { font-size: 1rem; font-weight: 900; letter-spacing: -0.02em; }
+    #modal-box p  { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
+    #link-input {
+      background: #07000f;
+      border: 1px solid rgba(93,106,241,0.25);
+      border-radius: 8px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 0.75rem 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #link-input:focus { border-color: var(--accent); }
+    .modal-btns { display: flex; gap: 0.75rem; justify-content: flex-end; }
+    #modal-cancel {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 0.55rem 1.1rem;
+      text-transform: uppercase;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    #modal-cancel:hover { color: #fff; border-color: rgba(255,255,255,0.35); }
+    #modal-save {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      padding: 0.55rem 1.25rem;
+      text-transform: uppercase;
+      transition: filter 0.2s;
+    }
+    #modal-save:hover { filter: brightness(1.18); }
+
+    /* Tap ripple */
+    .tap-ripple {
+      position: fixed;
+      border-radius: 50%;
+      border: 1.5px solid rgba(93,106,241,0.55);
+      pointer-events: none;
+      transform: scale(0);
+      animation: tapRipple 0.6s ease-out forwards;
+      z-index: 99;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(12px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes fadeIn  { to { opacity:1; } }
+    @keyframes tapRipple { to { transform:scale(1); opacity:0; } }
+  </style>
+</head>
+<body>
+
+  <canvas id="canvas"></canvas>
+
+  <div class="corner corner--tl"></div>
+  <div class="corner corner--tr"></div>
+  <div class="corner corner--bl"></div>
+  <div class="corner corner--br"></div>
+
+  <div class="mobile-container">
+
+    <div class="top-badge">
+      <i class="fa-solid fa-wifi"></i> <strong>HaiWiFi</strong>
+    </div>
+
+    <h1 class="heading">
+      Powerful Wi-Fi Tool<br>
+      Create By <span class="accent">HaldarAi</span> 💡
+    </h1>
+
+    <div class="feature-card">
+      <div class="diamond-wrapper">
+        <i class="fa-solid fa-lightbulb"></i>
+      </div>
+      <div class="diamond-wrapper">
+        <i class="fa-solid fa-wifi"></i>
+      </div>
+      <div class="app-icon-box">
+        <i class="fa-solid fa-wifi"></i>
+        <span><strong>HaiWiFi</strong></span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <a href="https://play.google.com/store/apps/details?id=com.haiwifi" id="play-btn" class="install-btn" target="_blank" rel="noopener">
+        <div class="android-icon">
+          <i class="fa-brands fa-android"></i>
+        </div>
+        <span class="install-text">INSTALL</span>
+      </a>
+
+      <button class="link-btn" id="link-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+        Set Link
+      </button>
+    </div>
+
+    <div class="footer">
+      <span>HaldarAi</span> 💡
+    </div>
+
+  </div>
+
+  <!-- Link modal -->
+  <div id="link-modal">
+    <div id="modal-backdrop"></div>
+    <div id="modal-box">
+      <h3>Set Google Play Link</h3>
+      <p>Paste your Google Play Store URL below. The install button will update instantly.</p>
+      <input id="link-input" type="url" placeholder="https://play.google.com/store/apps/details?id=..." />
+      <div class="modal-btns">
+        <button id="modal-cancel">Cancel</button>
+        <button id="modal-save">Save Link</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ─── Particle canvas (same engine) ─── */
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const IS_MOBILE = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
+    const DPR = IS_MOBILE ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+    let W, H;
+
+    function resize() {
+      W = window.innerWidth; H = window.innerHeight;
+      canvas.width = W * DPR; canvas.height = H * DPR;
+      canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      buildGrid();
+    }
+
+    const COUNT = IS_MOBILE ? 30 : 60;
+    const CONNECT_DIST = IS_MOBILE ? 80 : 110;
+    const CD_SQ = CONNECT_DIST * CONNECT_DIST;
+    const REPEL_SQ = IS_MOBILE ? 90*90 : 130*130;
+    const ATTRACT_SQ = IS_MOBILE ? 130*130 : 180*180;
+    const BURST_CAP = IS_MOBILE ? 25 : 50;
+    const DRAW_CONNECTIONS = !IS_MOBILE;
+    const CELL = CONNECT_DIST;
+    const LINE_ALPHAS = ['rgba(93,106,241,0.04)','rgba(93,106,241,0.07)','rgba(93,106,241,0.11)','rgba(93,106,241,0.15)'];
+    const MOUSE = { x: -9999, y: -9999, down: false };
+    let particles = [], bursts = [], ripples = [];
+    let grid = new Map();
+
+    function buildGrid() {}
+    function cellKey(cx, cy) { return cx * 10000 + cy; }
+
+    function populateGrid() {
+      grid.clear();
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        const cx = (p.x / CELL) | 0, cy = (p.y / CELL) | 0;
+        const k = cellKey(cx, cy);
+        if (!grid.has(k)) grid.set(k, []);
+        grid.get(k).push(i);
+      }
+    }
+
+    function mkParticle() {
+      return { x: Math.random()*W, y: Math.random()*H, r: Math.random()*1.2+0.3,
+               vx: (Math.random()-.5)*.25, vy: (Math.random()-.5)*.25, alpha: Math.random()*.4+.05 };
+    }
+    function init() { particles = Array.from({ length: COUNT }, mkParticle); }
+
+    function spawnBurst(x, y, n = 18) {
+      const room = BURST_CAP - bursts.length; if (room <= 0) return; n = Math.min(n, room);
+      for (let i = 0; i < n; i++) {
+        const angle = (Math.PI*2*i/n)+Math.random()*.4, speed = Math.random()*4+1.5;
+        bursts.push({ x, y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed,
+                      r: Math.random()*1.6+.4, life: 1, decay: Math.random()*.022+.018 });
+      }
+    }
+    function spawnRipple(x, y) { if (ripples.length < 5) ripples.push({ x, y, radius: 2, alpha: .55 }); }
+
+    const connLines = [[], [], [], []];
+    const checked = new Uint8Array(COUNT * COUNT);
+
+    function updateConnections() {
+      connLines[0].length = connLines[1].length = connLines[2].length = connLines[3].length = 0;
+      checked.fill(0); populateGrid();
+      for (let i = 0; i < COUNT; i++) {
+        const pi = particles[i], cx = (pi.x/CELL)|0, cy = (pi.y/CELL)|0;
+        for (let dcx = -1; dcx <= 1; dcx++) for (let dcy = -1; dcy <= 1; dcy++) {
+          const cell = grid.get(cellKey(cx+dcx, cy+dcy)); if (!cell) continue;
+          for (let k = 0; k < cell.length; k++) {
+            const j = cell[k]; if (j <= i || checked[i*COUNT+j]) continue;
+            checked[i*COUNT+j] = 1;
+            const pj = particles[j], dx = pi.x-pj.x, dy = pi.y-pj.y, dsq = dx*dx+dy*dy;
+            if (dsq < CD_SQ) { const t = 1-dsq/CD_SQ; connLines[Math.min(3,(t*4)|0)].push(pi.x,pi.y,pj.x,pj.y); }
+          }
+        }
+      }
+    }
+
+    let lastDrag = null, frameCount = 0;
+
+    function draw() {
+      frameCount++;
+      ctx.clearRect(0, 0, W, H);
+      const mx = MOUSE.x, my = MOUSE.y;
+
+      for (let i = ripples.length-1; i >= 0; i--) {
+        const rp = ripples[i]; rp.radius += 4; rp.alpha *= .93;
+        if (rp.alpha < .012) { ripples.splice(i,1); continue; }
+        ctx.beginPath(); ctx.arc(rp.x, rp.y, rp.radius, 0, Math.PI*2);
+        ctx.strokeStyle = `rgba(93,106,241,${rp.alpha.toFixed(2)})`; ctx.lineWidth = 1.5; ctx.stroke();
+      }
+
+      for (const p of particles) {
+        if (!IS_MOBILE) {
+          const mdx=p.x-mx, mdy=p.y-my, mdsq=mdx*mdx+mdy*mdy, limit=MOUSE.down?ATTRACT_SQ:REPEL_SQ;
+          if (mdsq<limit && mdsq>1) {
+            const mdist=Math.sqrt(mdsq), lim=MOUSE.down?180:130, force=(lim-mdist)/lim*.4, sign=MOUSE.down?-1:1;
+            p.vx+=sign*(mdx/mdist)*force; p.vy+=sign*(mdy/mdist)*force;
+          }
+        }
+        p.vx*=.98; p.vy*=.98; p.x+=p.vx; p.y+=p.vy;
+        if (p.x<0) p.x=W; else if (p.x>W) p.x=0;
+        if (p.y<0) p.y=H; else if (p.y>H) p.y=0;
+      }
+
+      for (let i=bursts.length-1;i>=0;i--) {
+        const b=bursts[i]; b.vx*=.93; b.vy*=.93; b.x+=b.vx; b.y+=b.vy; b.life-=b.decay;
+        if (b.life<=0) bursts.splice(i,1);
+      }
+
+      if (DRAW_CONNECTIONS) {
+        if (frameCount%2===0) updateConnections();
+        ctx.lineWidth=.5;
+        for (let b=0;b<4;b++) {
+          const pts=connLines[b]; if (!pts.length) continue;
+          ctx.beginPath(); ctx.strokeStyle=LINE_ALPHAS[b];
+          for (let k=0;k<pts.length;k+=4) { ctx.moveTo(pts[k],pts[k+1]); ctx.lineTo(pts[k+2],pts[k+3]); }
+          ctx.stroke();
+        }
+      }
+
+      ctx.fillStyle='rgba(93,106,241,0.5)';
+      ctx.beginPath();
+      for (const p of particles) { ctx.moveTo(p.x+p.r,p.y); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); }
+      ctx.fill();
+
+      if (bursts.length) {
+        let tl=0; for (let i=0;i<bursts.length;i++) tl+=bursts[i].life;
+        ctx.fillStyle=`rgba(93,106,241,${(tl/bursts.length*.85).toFixed(2)})`;
+        for (let i=0;i<bursts.length;i++) { const b=bursts[i],s=b.r*b.life; ctx.fillRect(b.x-s,b.y-s,s*2,s*2); }
+      }
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', () => { resize(); init(); });
+    window.addEventListener('mousemove', e => {
+      MOUSE.x=e.clientX; MOUSE.y=e.clientY;
+      if (MOUSE.down&&(!lastDrag||(e.clientX-lastDrag.x)**2+(e.clientY-lastDrag.y)**2>400)) {
+        spawnBurst(e.clientX,e.clientY,4); lastDrag={x:e.clientX,y:e.clientY};
+      }
+    });
+    window.addEventListener('mouseleave',()=>{MOUSE.x=-9999;MOUSE.y=-9999;});
+    window.addEventListener('mousedown',e=>{ MOUSE.down=true; lastDrag=null; spawnBurst(e.clientX,e.clientY,IS_MOBILE?10:16); spawnRipple(e.clientX,e.clientY); });
+    window.addEventListener('mouseup',()=>{MOUSE.down=false;lastDrag=null;});
+    window.addEventListener('touchstart',e=>{
+      const t=e.touches[0], size=160, el=document.createElement('div');
+      el.className='tap-ripple';
+      el.style.cssText=`width:${size}px;height:${size}px;left:${t.clientX-size/2}px;top:${t.clientY-size/2}px`;
+      document.body.appendChild(el); el.addEventListener('animationend',()=>el.remove());
+    },{passive:true});
+
+    resize(); init(); draw();
+
+    /* ─── Link modal ─── */
+    const modal=document.getElementById('link-modal');
+    const backdrop=document.getElementById('modal-backdrop');
+    const linkInput=document.getElementById('link-input');
+    const modalSave=document.getElementById('modal-save');
+    const modalCancel=document.getElementById('modal-cancel');
+    const playBtn=document.getElementById('play-btn');
+
+    function openModal()  { linkInput.value=playBtn.href; modal.style.display='flex'; requestAnimationFrame(()=>linkInput.focus()); }
+    function closeModal() { modal.style.display='none'; }
+
+    document.getElementById('link-btn').addEventListener('click',openModal);
+    backdrop.addEventListener('click',closeModal);
+    modalCancel.addEventListener('click',closeModal);
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+    modalSave.addEventListener('click',()=>{
+      const url=linkInput.value.trim(); if(!url) return;
+      playBtn.href=url;
+      const orig=modalSave.textContent;
+      modalSave.style.background='#7b84f3'; modalSave.textContent='Saved ✓';
+      setTimeout(()=>{ modalSave.style.background=''; modalSave.textContent=orig; closeModal(); },800);
+    });
+  </script>
+</body>
+</html>
